@@ -1,0 +1,57 @@
+<html>
+   <head>
+
+   </head>
+
+   <body>
+      <div id="container">
+
+         <!-- <p>Click the button to get your coordinates.</p> -->
+<!--          <button onclick="getLocation()">Try It</button>
+         <p id="demo"></p> -->
+
+
+         <a id="button" href="#">Show Details</a>
+         <div id="item">
+            <br>
+            This is a daylight clock for New York City. 
+            <br>
+            It rotates 360 degrees over the course of daylight hours.
+            <br>
+            <br>
+
+            <div id="time"></div>
+            <br>
+            <div id="daylength"></div>
+            <br>
+            <div id="degree"></div>
+
+         </div>
+
+      </div> 
+
+      <br>
+
+      <div id="clock-div">
+
+         <svg id="clock" viewBox="0 0 100 100">
+         <circle id="face" cx="50" cy="50" r="46"/>
+            <g id="hands">
+               <line id="hand" x1="50" y1="50" x2="50" y2="4" style="stroke:rgb(255,0,0) stroke-width:2" />
+            </g>
+         </svg>
+
+      </div>
+
+      <div id="info">
+      </div>
+
+   <script type="text/javascript" src="jquery-1.11.3.min.js"></script>
+   <script type="text/javascript" src="clock.js"></script>
+   <link href='http://fonts.googleapis.com/css?family=Yantramanav:100' rel='stylesheet' type='text/css'>
+   <link href="style.css" rel="stylesheet">
+
+   </body>
+
+</html>
+
