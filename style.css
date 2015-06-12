@@ -1,9 +1,9 @@
    body {
-      /*font-family: 'Raleway', sans-serif;*/
-      /*font-size: 30;*/
       font-family: 'Yantramanav', sans-serif;
-
       background: linear-gradient(180deg, #cbe6f5, white);
+/*      background: url(../img/gradient-04.jpg) no-repeat;
+      background-size: 100% 100%;*/
+      /*opacity: 0.10;*/
    }
 
    #container{
@@ -18,8 +18,10 @@
    #clock-div {
       position:relative;
       fill: #4d4d4d;
-      width:45%;
-      margin-top:100px;
+      width:50%;
+      /*margin-top: auto;*/
+      /*margin-bottom: auto;*/
+      /*margin-top:100px;*/
       margin-left: auto;
       margin-right: auto;
       opacity: 20%;
@@ -30,3 +32,6 @@
       bottom:10px;
       margin-right:0px;
    }
+
+
+find range of values - 
