@@ -1,135 +1,97 @@
+var sunrise, sunset, utcsunrise, utcsunset;
+var currentTime, currentdegree, daylength;
 
-var sunriseUTC, sunsetUTC;
-var sunrise, sunset;
-
-var currentTime;
-var now;
-var daylength;
-
-var hours, minutes, seconds;
-var currentdegree;
-
-var str;
-var json;
-
-var lat;
-var lon;
-
-//toggle information
-$( "#item" ).hide();
-$( "#button" ).click(function() {
-  $( "#item" ).toggle();
-});
-
+var myArray = [];
+// get user location from the browser
 navigator.geolocation.getCurrentPosition(function(position) {
-    console.log(position);
-    parseLocation(position)
+  getLocation(position)
 }, function(positionError) {
-    console.error(positionError);
+  console.error(positionError);
 });
 
-function parseLocation(data) {
-  lat = data.coords.latitude;
-  // console.log(lat);
-  lon = data.coords.longitude;
-  // console.log(lon);
-  getWeather();
+function getLocation(data) {
+  var lat = data.coords.latitude;
+  var lon = data.coords.longitude;
+  console.log("lat = " + lat + ", lon = " + lon);
+
+  getTodayData(lat, lon);
 }
 
-function getWeather() {
-  $.ajax({
-    url: "http://api.openweathermap.org/data/2.5/weather?lat=" + lat + "&lon=" + lon,
-    dataType: 'json',
-    success: function(data) {
-      console.log(data);
-      parseMyJson(data);
-    },
-    error: function() {
-      alert("looks like you aren't connected to the internet");
-    }
-  });
+function parseTimes(json) {
+  utcsunrise = json.sunrise.getTime()/1000;
+  utcsunset = json.sunset.getTime()/1000;
+  console.log("utc sunrise " + utcsunrise + ", utc sunset " + utcsunset);
+
+  sunrise = convertUNIX(utcsunrise);
+  sunset = convertUNIX(utcsunset);
+  console.log("sunrise is at " + sunrise + " seconds, sunset is at " + sunset + " seconds");
 }
 
+function getTodayData(_lat, _lon){
+  var times = SunCalc.getTimes(new Date(), _lat, _lon);
 
-function parseMyJson(json) {
-   sunriseUTC = json.sys.sunrise;
-   sunrise = convertUNIX(sunriseUTC);
-   console.log("sunrise: " + sunrise);
+  parseTimes(times);
+  // console.log(times);
+}
 
-   sunsetUTC = json.sys.sunset;
-   sunset = convertUNIX(sunsetUTC);
-   console.log("sunset: " + sunset);
-
-   daylength = parseInt(sunset) - parseInt(sunrise);
-   console.log("daylength:" + daylength);
-
-   currentTime = getCurrentTime();
-   now = parseInt(currentTime) - parseInt(sunrise);
-   console.log('right now = ' + now);
-
-   checkDayLight(); 
-} 
-
+/*
+the function convertUNIX takes a UTC timestamp and finds the seconds in THAT particular day
+there are 86400 seconds in a day - so the sunrise should be sometime around 2000-3000 seconds, and sunset should be 5000++
+*/
 var convertUNIX = function(UTC) {
-   var date = new Date(UTC*1000);   // multiplied by 1000 so that the argument is in milliseconds to work with javascript
-   
-   var hours = date.getHours() * 60; 
-   var minutes = "0" + date.getMinutes();
-   var totalMinutes = parseInt(hours) + parseInt(minutes);
+  var date = new Date(UTC*1000);         
+  var hours = date.getHours() * 60; 
+  var minutes = "0" + date.getMinutes();
+  var totalMinutes = parseInt(hours) + parseInt(minutes);
+  var totalSeconds = parseInt(totalMinutes) * 60;
 
-   var totalSeconds = parseInt(totalMinutes) * 60;
-   return totalSeconds;
+  return totalSeconds;
+
+  alert();
 }
 
 function getCurrentTime() {
-   date = new Date();
-   hours = date.getHours() * 60; 
-   minutes = "0" + date.getMinutes();
-   seconds = date.getSeconds();
-   totalMinutes = parseInt(hours) + parseInt(minutes);
-   
-   var totalSeconds = (parseInt(totalMinutes) * 60) + parseInt(seconds);
-   return totalSeconds;
+  //this is getting the number of seconds that have elapsed since the beginning of TODAY - it resets to zero at midnight
+  date = new Date();
+  hours = date.getHours() * 60; 
+  minutes = "0" + date.getMinutes();
+  seconds = date.getSeconds();
+  totalMinutes = parseInt(hours) + parseInt(minutes);
+
+  var totalSeconds = (parseInt(totalMinutes) * 60) + parseInt(seconds);
+  return totalSeconds;
 }
 
-// check to see if it's currently within daylight hours
-// mostly for debugging...can delete later
-function checkDayLight() {
-   if (currentTime > sunset || currentTime < sunrise) {
-      console.log("IT'S DARK");
-      return;
-   } else {
-      console.log("IT'S LIGHT OUT");
-   }
+//for debugging
+function checkDaylight() {
+  if (utcCurrentTime > utcsunrise && utcCurrentTime < utcsunset){
+    console.log("it is currently light out");
+  } else {
+    console.log("it is currently dark out");
+  }
 }
 
 setInterval(function() {
-   //update now - this happens above also, maybe move to function to avoid redundancy?
-   currentTime = getCurrentTime();
-   now = parseInt(currentTime) - parseInt(sunrise);
-   
-   //update daylight - add this in case browser is open for a long time
+  currentTime = getCurrentTime();
+  var daylightSec = Math.floor(sunset - sunrise); //retuns the daylength in seconds 
+  // console.log("total daylight for current day: " + daylightSec + " seconds");
 
-   currentdegree = (360*now)/daylength; //in minutes, 1440 minutes in 24 hours
+  //calculate the degree
+  var elapsed = parseInt(currentTime) - parseInt(sunrise);
+  currentdegree = (360*elapsed)/daylightSec; //in minutes, 1440 minutes in 24 hours
+  if (currentdegree > 360 || currentdegree < 0) {
+    currentdegree = 0;
+  } 
 
-   if (currentdegree > 360 || currentdegree < 0){
-      currentdegree = 0;
-   }
+  // console.log(currentdegree);
+  function rotate(el, degree) {
+    el.setAttribute('transform', 'rotate('+ degree +' 50 50)')
+  }
 
-   function rotate(el, degree) {
-      el.setAttribute('transform', 'rotate('+ degree +' 50 50)')
-   }
-   
-   rotate(hand, currentdegree);
-
-   // constantly printing degree in console
-   // console.log('current degree: ' + currentdegree);
-
-   //print the stuff to the screen
-   document.getElementById('degree').innerHTML = "current degree: " + currentdegree.toFixed(1);
-   document.getElementById('daylength').innerHTML = "hours of daylight " +(daylength/3600).toFixed(2);
-   document.getElementById('time').innerHTML = date;
+  rotate(hand, currentdegree);
 
 }, 1000);
+
+
 
 
