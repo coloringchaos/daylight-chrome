@@ -6,31 +6,72 @@
  -->
 <html>
   <head>
-    <title>Luminance Daylight Clock</title>
     <style>
       body {
-        font-family: "Segoe UI", "Lucida Grande", Tahoma, sans-serif;
-        font-size: 100%;
+        font-family: monospace;
+        font-size:1em;
+        width:300px;
+        margin:20px;
+        background-color:whitesmoke;
       }
-      #status {
-        /* avoid an excessively wide status text */
-        white-space: pre;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        max-width: 400px;
+      .blue{
+        background-color: steelblue;
+        color:white;
       }
+      .button{
+        cursor:pointer;
+        padding:9px 15px;
+        /*z-index: 100;*/
+        font-weight: 800;
+        opacity:.8;
+      }
+      #popupData{
+        display:none;
+      }
+      hr{
+        margin:1.5em 0;
+        height: 1px;
+        border: 0;
+        border-top: 1px solid #ddd;
+        padding: 0; 
+      }
+      
     </style>
-    <!--
-      - JavaScript and HTML must be in separate files: see our Content Security
-      - Policy documentation[1] for details and explanation.
-      -
-      - [1]: https://developer.chrome.com/extensions/contentSecurityPolicy
-     -->
-    <script src="popup.js"></script>
+
+    <!-- <script src="popup.js"></script> -->
   </head>
   <body>
-    <div id="status"></div>
-    <img id="image-result" hidden>
+    <h1>daylight clock</h1>
+
+    <p>made by Arielle Hein</p>
+
+    <hr>
+
+    <p>open a new tab to see the clock</p>    
+
+    <p class="text"><strong>have a bright day &#9728;</strong></p>
+
+
+<!--     <span class="button blue" id="getData">get data</span>
+
+    <p class="text" id="popupData">
+      sunrise is at <span id="riseHrs">0</span>:<span id="riseMin">00</span>am
+
+      <br><br>
+
+      sunset is at <span id="setHrs">0</span>:<span id="setMin">00</span>pm
+
+      <br><br>
+
+      today there are <span id="lengthH">0</span> hours, <span id="lengthM">00</span> minutes, and <span id="lengthS">00</span> seconds of daylight
+
+    </p>
+
+    <script type="text/javascript" src="suncalc.js"></script>
+    <script type="text/javascript" src="jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src="clock.js"></script> -->
+
+
   </body>
 </html>
 

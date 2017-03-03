@@ -5,50 +5,69 @@
 
    <body>
 
-      <div id="container">
-<!--          <form>
-            <input type="text" id="degree" name="degree">
-            <input type="button" value="submit" submit="changeDegree(document.getElementById('degree').value);">
-         </form> -->
-
-
-<!--          <a id="button" href="#">Show Details</a>
-         <div id="item">
-            <br>
-            This is a daylight clock.
-            <br>
-            It rotates 360 degrees over the course of daylight hours.
-            <br>
-            <br>
-
-            <div id="time"></div>
-            <br>
-            <div id="daylength"></div>
-            <br>
-            <div id="degree"></div>
-
-         </div> -->
-
-      </div> 
-
       <div id="clock-div">
 
-         <svg id="clock" viewBox="0 0 100 100">
-            <circle id="face" cx="50" cy="50" r="46"/>
-            <g id="hands">
-               <line id="hand" x1="50" y1="50" x2="50" y2="4"/>
-            </g>
-         </svg>
+      <div id="container"></div>
 
-      </div>
+      <h1 id="loading">loading...</h1>
 
+      <svg id="clock" viewBox="0 0 100 100">
+        <circle id="face" cx="50" cy="50" r="46"/>
+          <g id="hands">
+            <line id="hand" x1="50" y1="50" x2="50" y2="4"/>
+          </g>
+       </svg>
+
+    
+    </div>
+
+    <div class="btnbox">
+      <span class="button white" id="info">Daylight Clock</span>
+
+      <span class="button blue" id="bgBtn">Background</span>
+    </div>
+
+    <div id="content">
+
+      <p class="text">this is a daylight clock. it rotates 360 degrees over the course of daylight hours.</p>
+
+      <p class="text"> 
+        <span id="weekday">Day</span> <span id="month">Month</span> <span id="day">00</span>
+
+        <br><br>
+
+        <span id="hour">00</span><span id="separator">:</span><span id="minute">00</span><span id="meridiem">pm</span>
+       
+      </p >
+
+      <p class="text">
+        <!-- sunrise is at <span id="riseHrs">0</span>:<span id="riseMin">00</span>am -->
+        first light is at <span id="riseHrs">0</span>:<span id="riseMin">00</span>am
+
+        <br><br>
+
+        <!-- sunset ends at <span id="setHrs">0</span>:<span id="setMin">00</span>pm -->
+        last light is at <span id="setHrs">0</span>:<span id="setMin">00</span>pm
+
+        <br><br>
+
+        today there are <span id="lengthH">0</span> hours, <span id="lengthM">00</span> minutes of daylight
+
+      </p>
+
+
+      <p class="text">have a bright day &#9728;</p>
+      
+      <div class="text"><span class="button blue" id="hideBtn">Hide This</span></div>
+
+    </div>
      
    <script type="text/javascript" src="suncalc.js"></script>
    <script type="text/javascript" src="jquery-1.11.3.min.js"></script>
    <script type="text/javascript" src="clock.js"></script>
-   <link href='http://fonts.googleapis.com/css?family=Yantramanav:100' rel='stylesheet' type='text/css'>
+
+   <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet">
    <link href="style.css" rel="stylesheet">
-   <!-- <link href="gradient-test.html"> -->
 
    </body>
 
