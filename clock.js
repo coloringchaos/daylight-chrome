@@ -1,5 +1,5 @@
-var sunrise, sunset, utcsunrise, utcsunset;
-var currentTime, daylength, currentdegree, daylightSec;
+var sunrise, sunset, utcsunrise, utcsunset, dawn, dusk, utcdawn, utcdusk;
+var currentTime, daylength, currentdegree, daylightSec, dawnToDusk;
 var loaded = false;
 
 //dont show the clock face at first
@@ -43,9 +43,12 @@ function getTodayData(_lat, _lon){
 //deal with formatting of the json data we got from SunCalc
 function parseTimes(json) {
     //////////// DUSK / DAWN
-    utcsunrise = json.dawn.getTime()/1000;
-    utcsunset = json.dusk.getTime()/1000;
+    utcsunrise = json.sunrise.getTime()/1000;
+    utcsunset = json.sunset.getTime()/1000;
 
+    utcdawn = json.dawn.getTime()/1000;
+    // console.log("utcdawn: " + utcdawn);
+    utcdusk = json.dusk.getTime()/1000;
 
     //////////// SUNRISE / SUNSET
     // utcsunrise = json.sunrise.getTime()/1000;
@@ -58,6 +61,9 @@ function parseTimes(json) {
     sunset = convertUNIX(utcsunset);
     // console.log("sunrise is at " + sunrise + " seconds, sunset is at " + sunset + " seconds");
 
+    dawn = convertUNIX(utcdawn);
+    dusk = convertUNIX(utcdusk);
+    
     getRiseSetTimes();
     getDaylength();
 }
@@ -94,7 +100,7 @@ function getCurrentTime() {
 }
 
 function getDaylength(){
-  /////GET DAY LENGTH - this is sent to the DOM for info popup
+  /////SUNRISE TO SUNSET - this is sent to the DOM for info popup
   daylightSec = sunset - sunrise;
   console.log("daylightSec: " + daylightSec);
 
@@ -102,23 +108,34 @@ function getDaylength(){
   var h = Math.floor(daylightSec / 3600);
   var m = Math.floor(daylightSec % 3600 / 60);
   var s = Math.floor(daylightSec % 3600 % 60);
-  console.log("h: " + h + ", m: " + m + ", s: " + s);
+  // console.log("h: " + h + ", m: " + m + ", s: " + s);
 
   document.getElementById('lengthH').innerHTML = h;
   document.getElementById('lengthM').innerHTML = m;
-  // document.getElementById('lengthS').innerHTML = s;
+  
+  /////DAWN TO DUSK
+  dawnToDusk = dusk - dawn;
+
+  //convert daylightSec to something human readable (hrs, min, sec)
+  var hh = Math.floor(dawnToDusk / 3600);
+  var mm = Math.floor(dawnToDusk % 3600 / 60);
+  var ss = Math.floor(dawnToDusk % 3600 % 60);
+  console.log("hh: " + hh + ", mm: " + mm);
+
+  document.getElementById('dawnToDuskH').innerHTML = hh;
+  document.getElementById('dawnToDuskM').innerHTML = mm;
 
 }
 
 function getRiseSetTimes(){
   //GET SUNRISE TIME - then send this to the DOM
   //this is for the '?' popup
+
+  /////SUNRISE
   var rise = new Date(0); // The 0 there is the key, which sets the date to the epoch
   rise.setUTCSeconds(utcsunrise);
   var riseHrs = rise.getHours();
   var riseMin = rise.getMinutes();
-
-  // console.log('sunrise: ' + rise);
 
   if(riseMin<10){
     document.getElementById('riseMin').innerHTML = '0' + riseMin;
@@ -128,6 +145,7 @@ function getRiseSetTimes(){
   document.getElementById('riseHrs').innerHTML = riseHrs;
   
 
+  //////SUNSET
   var set = new Date(0);
   set.setUTCSeconds(utcsunset);
   var setHrs = set.getHours() - 12;
@@ -140,8 +158,33 @@ function getRiseSetTimes(){
     document.getElementById('setMin').innerHTML = setMin;
   }
 
-  // console.log('sunset:' + set);
   document.getElementById('setHrs').innerHTML = setHrs;
+
+  /////DAWN
+  var dawn = new Date(0); // The 0 there is the key, which sets the date to the epoch
+  dawn.setUTCSeconds(utcdawn);
+  var dawnHrs = dawn.getHours();
+  var dawnMin = dawn.getMinutes();
+
+  if(dawnMin<10){
+    document.getElementById('dawnMin').innerHTML = '0' + dawnMin;
+  }else{
+    document.getElementById('dawnMin').innerHTML = dawnMin;
+  }
+  document.getElementById('dawnHrs').innerHTML = dawnHrs;
+
+  /////DUSK
+  var dusk = new Date(0); // The 0 there is the key, which sets the date to the epoch
+  dusk.setUTCSeconds(utcdusk);
+  var duskHrs = dusk.getHours() - 12;
+  var duskMin = dusk.getMinutes();
+
+  if(duskMin<10){
+    document.getElementById('duskMin').innerHTML = '0' + duskMin;
+  }else{
+    document.getElementById('duskMin').innerHTML = duskMin;
+  }
+  document.getElementById('duskHrs').innerHTML = duskHrs;
     
 }
 
