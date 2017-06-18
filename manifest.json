@@ -1,9 +1,9 @@
 {
   "manifest_version": 2,
 
-  "name": "Luminance Daylight Clock",
-  "description": "This extensions shows the current daylight reading for your specific location.",
-  "version": "1.0",
+  "name": "Daylight Clock",
+  "description": "This extensions is a location-based daylight clock that rotates 360 degrees over the course of daylight hours.",
+  "version": "1.4",
 
   "chrome_url_overrides" : {
     "newtab": "daylight.html"
@@ -17,6 +17,10 @@
   ],
 
   "browser_action": {
+    "default_icon": "icon16.png",
+
+
+
     "default_icon": "icon.png",
     "default_popup": "popup.html"
   },
@@ -30,6 +34,7 @@
   "permissions": [
     "activeTab",
     "https://ajax.googleapis.com/",
-    "geolocation"
+    "geolocation",
+    "contextMenus"
   ]
 }
