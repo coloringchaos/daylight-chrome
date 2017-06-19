@@ -1,65 +1,136 @@
 var sunrise, sunset, utcsunrise, utcsunset, dawn, dusk, utcdawn, utcdusk;
 var currentTime, daylength, currentdegree, daylightSec, dawnToDusk;
 var loaded = false;
+var gotlocation = false;
 
-//dont show the clock face at first
-// document.getElementById("hands").style.display = "none";
+var lat, lon;
 
+// getLat();
+// getLon();
 
-// get user location from the browser
-navigator.geolocation.getCurrentPosition(function(position) {
-  getLocation(position)
-}, function(positionError) {
-  console.error(positionError);
+var getLat = new Promise(function(resolve,reject){
+  chrome.storage.sync.get("lat", function (data) {
+    lat = data.lat;
+  });
+
+  if(lat){
+    console.log("i have the saved lat: " + lat);
+    resolve("it worked");
+  }
+  else{
+    reject(Error("got nothing"));
+  }
+
 });
 
-//set lat and lon
-function getLocation(data) {
-  var lat = data.coords.latitude;
-  var lon = data.coords.longitude;
-  console.log("lat = " + lat + ", lon = " + lon);
 
+getLat.then(function(result){
+  console.log(result); // "Stuff worked!"
+}, function(err) {
+  console.log(err); // Error: "It broke"
+});
+
+// function getLon(){
+//   chrome.storage.sync.get("lon", function (data) {
+//     lon = data.lon;
+//     console.log("saved lon: " + lon);
+    
+//   });
+//   return true;
+// }
+
+// if(getLat){
+//   console.log("getLat is true");
+//   getTodayData(lat,lon);
+// }
+
+
+
+// on load, check if we have a location saved - if we do, save it to global lat, lon
+// window.addEventListener("load", function(event) {
+//   chrome.storage.sync.get("lat", function (data) {
+//     lat = data.lat;
+//     console.log("saved lat: " + lat);
+//   });
+//   chrome.storage.sync.get("lon", function (data) {
+//     lon = data.lon;
+//     console.log("saved lon: " + lon);
+//   });
+//   // console.log(lat + ", " + lon);
+//   // getTodayData(lat, lon);
+// });
+
+// if(lat){
+//   console.log("FUCK YES");
+// }
+
+
+//if we DO have a latitude and longitude...
+if(lat !== undefined && lon !== undefined){
+  console.log("WE HAVE A LOCATION");
+  console.log("the saved lat is: " + lat + ", the saved lon is: " + lon);
   getTodayData(lat, lon);
-  loaded = true;
-  // console.log("LOADED");
-  showClock();
+  // loaded = true;
 }
+
+// //if we don't have a latitude and longitude, get it
+// if(lat == undefined || lon == undefined){
+//   console.log("WE DON'T HAVE LOCATION, GETTING IT");
+//   // get user location from the browser
+//   navigator.geolocation.getCurrentPosition(function(position) {
+//     getLocation(position)
+//   }, function(positionError) {
+//     console.error(positionError);
+//   });
+// }
+
+//set lat and lon based on the location we just got
+function getLocation(data) {
+  console.log('getLocation() happened');
+  lat = data.coords.latitude;
+  lon = data.coords.longitude;
+
+  //save the lat and lon to chrome for quicker loading in the future
+  chrome.storage.sync.set({'lat': lat, 'lon': lon}, function(){
+    console.log("location saved");
+  });
+  getTodayData(lat,lon);
+}
+
 
 //do this on load - once we have lat lon data, show clock and hide 'loading'
 function showClock(){
-  console.log("showing clock");
+  console.log('showClock() happened');
   document.getElementById('hands').style.display = "block";
   document.getElementById('loading').style.display = "none";
 }
 
 //get today's data
 function getTodayData(_lat, _lon){
+  console.log('getTodayData() happened - ' + lat + ", " + lon);
   var times = SunCalc.getTimes(new Date(), _lat, _lon);
-
-    // console.log(times);
-    parseTimes(times);
+  parseTimes(times);
 }
 
 //deal with formatting of the json data we got from SunCalc
 function parseTimes(json) {
-    //////////// DUSK / DAWN
+  console.log('parseTimes() happened');
+    //// DUSK / DAWN ////
     utcsunrise = json.sunrise.getTime()/1000;
     utcsunset = json.sunset.getTime()/1000;
 
     utcdawn = json.dawn.getTime()/1000;
-    // console.log("utcdawn: " + utcdawn);
     utcdusk = json.dusk.getTime()/1000;
 
-    //////////// SUNRISE / SUNSET
+    //// SUNRISE / SUNSET ////
     // utcsunrise = json.sunrise.getTime()/1000;
     // utcsunset = json.sunset.getTime()/1000;
-    // console.log("utc sunrise " + utcsunrise + ", utc sunset " + utcsunset);
+    console.log("utc sunrise " + utcsunrise + ", utc sunset " + utcsunset);
 
 
     //convert to UNIX - used for rotation calculation
     sunrise = convertUNIX(utcsunrise);
     sunset = convertUNIX(utcsunset);
-    // console.log("sunrise is at " + sunrise + " seconds, sunset is at " + sunset + " seconds");
 
     dawn = convertUNIX(utcdawn);
     dusk = convertUNIX(utcdusk);
@@ -76,19 +147,21 @@ there are 86400 seconds in a day - so the sunrise should be
 sometime around 2000-3000 seconds, and sunset should be 5000++
 */
 var convertUNIX = function(UTC) {
+  console.log('convertUNIX() happened');
   var date = new Date(UTC*1000);         
   var hours = date.getHours() * 60; 
   var minutes = "0" + date.getMinutes();
   var totalMinutes = parseInt(hours) + parseInt(minutes);
   var totalSeconds = parseInt(totalMinutes) * 60;
 
-  // console.log('date' + date);
   return totalSeconds;
 }
 
 
 function getCurrentTime() {
-  //this is getting the number of seconds that have elapsed since the beginning of TODAY - it resets to zero at midnight
+  // console.log('getCurrentTime() happened');
+  /* this is getting the number of seconds that have elapsed 
+  since the beginning of TODAY - it resets to zero at midnight */
   date = new Date();
   hours = date.getHours() * 60; 
   minutes = "0" + date.getMinutes();
@@ -100,7 +173,8 @@ function getCurrentTime() {
 }
 
 function getDaylength(){
-  /////SUNRISE TO SUNSET - this is sent to the DOM for info popup
+  console.log('getDaylength() happened');
+  //// SUNRISE TO SUNSET - this is sent to the DOM for info popup
   daylightSec = sunset - sunrise;
   console.log("daylightSec: " + daylightSec);
 
@@ -128,6 +202,7 @@ function getDaylength(){
 }
 
 function getRiseSetTimes(){
+  console.log('getRiseSetTimes() happened');
   //GET SUNRISE TIME - then send this to the DOM
   //this is for the '?' popup
 
@@ -190,6 +265,7 @@ function getRiseSetTimes(){
 
 
 setInterval(function() {
+  console.log('loaded: ' + loaded);
   currentTime = getCurrentTime();
   daylightSec = Math.floor(sunset - sunrise); //retuns the daylength in seconds 
   
@@ -217,7 +293,7 @@ setInterval(function() {
 
   rotate(hand, currentdegree);
 
-}, 1000);
+}, 5000); //change back to 1000
 
 
 
