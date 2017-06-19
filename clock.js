@@ -1,77 +1,65 @@
 var sunrise, sunset, utcsunrise, utcsunset, dawn, dusk, utcdawn, utcdusk;
 var currentTime, daylength, currentdegree, daylightSec, dawnToDusk;
-var loaded = false;
-var gotlocation = false;
 
 var lat, lon;
 
-// getLat();
-// getLon();
+//get lat saved to chrome
+var promiseLat = new Promise(function(resolve, reject) {
+  //retrieve stored lat from chrome
+  chrome.storage.sync.get("lat", function (data){
 
-var getLat = new Promise(function(resolve,reject){
-  chrome.storage.sync.get("lat", function (data) {
+    //set saved lat to our variable
     lat = data.lat;
-  });
+    lon = data.lon;
 
-  if(lat){
-    console.log("i have the saved lat: " + lat);
-    resolve("it worked");
-  }
-  else{
-    reject(Error("got nothing"));
-  }
-
+    //if we have a value, resolve. if not, reject
+    if (lat) {
+      resolve("got latitude saved in chrome mem: " + lat);
+    }
+    else {
+      reject(Error("can't get lat"));
+    }
+  })
 });
 
-
-getLat.then(function(result){
-  console.log(result); // "Stuff worked!"
+promiseLat.then(function(result) {
+  console.log(result);
 }, function(err) {
-  console.log(err); // Error: "It broke"
+  console.log(err);
 });
 
-// function getLon(){
-//   chrome.storage.sync.get("lon", function (data) {
-//     lon = data.lon;
-//     console.log("saved lon: " + lon);
-    
-//   });
-//   return true;
-// }
+var promiseLon = new Promise(function(resolve, reject) {
+  //retrieve stored lat from chrome
+  chrome.storage.sync.get("lon", function (data){
 
-// if(getLat){
-//   console.log("getLat is true");
-//   getTodayData(lat,lon);
-// }
+    //set saved lat to our variable
+    lon = data.lon;
 
+    //if we have a value, resolve. if not, reject
+    if (lon) {
+      resolve("got longitude saved in chrome mem: " + lon);
+    }
+    else {
+      reject(Error("can't get lon"));
+    }
+  })
+});
 
+promiseLon.then(function(result) {
+  console.log(result);
+}, function(err) {
+  console.log(err);
+});
 
-// on load, check if we have a location saved - if we do, save it to global lat, lon
-// window.addEventListener("load", function(event) {
-//   chrome.storage.sync.get("lat", function (data) {
-//     lat = data.lat;
-//     console.log("saved lat: " + lat);
-//   });
-//   chrome.storage.sync.get("lon", function (data) {
-//     lon = data.lon;
-//     console.log("saved lon: " + lon);
-//   });
-//   // console.log(lat + ", " + lon);
-//   // getTodayData(lat, lon);
-// });
-
-// if(lat){
-//   console.log("FUCK YES");
-// }
-
-
-//if we DO have a latitude and longitude...
-if(lat !== undefined && lon !== undefined){
-  console.log("WE HAVE A LOCATION");
-  console.log("the saved lat is: " + lat + ", the saved lon is: " + lon);
+//if both promises are resolved, then getTodayData
+Promise.all([promiseLat, promiseLon]).then(function(){
+  console.log('resolved all! we have coordinates!');
   getTodayData(lat, lon);
-  // loaded = true;
-}
+});
+
+
+//// COME BACK TO THIS!!!!
+//TODO: if either promise fails, need to get geoLocation
 
 // //if we don't have a latitude and longitude, get it
 // if(lat == undefined || lon == undefined){
@@ -85,27 +73,20 @@ if(lat !== undefined && lon !== undefined){
 // }
 
 //set lat and lon based on the location we just got
-function getLocation(data) {
-  console.log('getLocation() happened');
-  lat = data.coords.latitude;
-  lon = data.coords.longitude;
+// function getLocation(data) {
+//   console.log('getLocation() happened');
+//   lat = data.coords.latitude;
+//   lon = data.coords.longitude;
 
-  //save the lat and lon to chrome for quicker loading in the future
-  chrome.storage.sync.set({'lat': lat, 'lon': lon}, function(){
-    console.log("location saved");
-  });
-  getTodayData(lat,lon);
-}
+//   //save the lat and lon to chrome for quicker loading in the future
+//   chrome.storage.sync.set({'lat': lat, 'lon': lon}, function(){
+//     console.log("location saved");
+//   });
+//   getTodayData(lat,lon);
+// }
 
 
-//do this on load - once we have lat lon data, show clock and hide 'loading'
-function showClock(){
-  console.log('showClock() happened');
-  document.getElementById('hands').style.display = "block";
-  document.getElementById('loading').style.display = "none";
-}
-
-//get today's data
+//get today's data based on the lat and lon 
 function getTodayData(_lat, _lon){
   console.log('getTodayData() happened - ' + lat + ", " + lon);
   var times = SunCalc.getTimes(new Date(), _lat, _lon);
@@ -199,6 +180,8 @@ function getDaylength(){
   document.getElementById('dawnToDuskH').innerHTML = hh;
   document.getElementById('dawnToDuskM').innerHTML = mm;
 
+  //figure out 
+
 }
 
 function getRiseSetTimes(){
@@ -263,9 +246,12 @@ function getRiseSetTimes(){
     
 }
 
+function getDegree(){
+  
+}
+
 
 setInterval(function() {
-  console.log('loaded: ' + loaded);
   currentTime = getCurrentTime();
   daylightSec = Math.floor(sunset - sunrise); //retuns the daylength in seconds 
   
