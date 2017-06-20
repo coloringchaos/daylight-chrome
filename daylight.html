@@ -34,11 +34,17 @@
     <div id="content">
 
       <div id="allthestuff">
-        <div class="block top">
-          <p> 
-            <span id="weekday">Day</span> <span id="month">Month</span> <span id="day">00</span><br>
-            <span id="hour">00</span><span id="separator">:</span><span id="minute">00</span><span id="meridiem">pm</span>
-          </p>
+
+        <!-- current day and time -->
+        <div class="block">
+          <table class="table-sm">
+            <tr>
+              <td><span id="weekday">Day</span> <span id="month">Month</span> <span id="day">00</span></td>
+            </tr>
+            <tr>
+              <td><span id="hour">00</span><span id="separator">:</span><span id="minute">00</span><span id="meridiem">pm</td>
+            </tr>
+          </table>
         </div>
 
         <br>
@@ -102,7 +108,10 @@
         <!-- info block -->
         <div class="block">
           <p class="bold">This daylight clock provides a dynamic expression of time based on the period of daylight for your current location. </p>
-          <br>
+          
+        </div>
+        <!-- <span class="block"> -- </span> -->
+        <div class="block">
           <p class="info"><span class="bold">How it works:</span> The hand rotates 360 degrees over the course of daylight hours. Because the sun rises and sets at a different time every single day of the year, the hand of this clock moves at a different speed everyday - it rotates faster in the winter and slower in the summer. The hand does not move when the sun is down. </p>
         </div>
 
