@@ -18,17 +18,12 @@ body {
    bottom:0;
    right:0;
    left:0;
-<<<<<<< HEAD
-   background-image: url('img/gradient6.svg');
-   /*background-image: url('img/ocean.jpg');*/
-   
-=======
    background-color: #ddd;
    /*background-image: url('img/gradient6.svg');*/
    /*background-image: url('img/ocean.jpg');*/
    /*background:linear-gradient( 45deg, blue, red );*/
    background:linear-gradient( 20deg, lightskyblue, midnightblue );
->>>>>>> 5a908f719fa505745834f3bcc253a380cb810eca
+
    background-size: cover;
    opacity: .4; 
 }
