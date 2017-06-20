@@ -58,35 +58,28 @@ Promise.all([promiseLat, promiseLon]).then(function(){
 });
 
 
-//// COME BACK TO THIS!!!!
-//TODO: if either promise fails, need to get geoLocation
+//get the user's location, do this everytime even if we have something saved
+navigator.geolocation.getCurrentPosition(function(position) {
+  setLocation(position);
+  // console.log("got location");
+}, function(positionError) {
+  console.error(positionError);
+});
 
-// //if we don't have a latitude and longitude, get it
-// if(lat == undefined || lon == undefined){
-//   console.log("WE DON'T HAVE LOCATION, GETTING IT");
-//   // get user location from the browser
-//   navigator.geolocation.getCurrentPosition(function(position) {
-//     getLocation(position)
-//   }, function(positionError) {
-//     console.error(positionError);
-//   });
-// }
+// set lat and lon based on the location we just got
+function setLocation(data) {
+  lat = data.coords.latitude;
+  lon = data.coords.longitude;
 
-//set lat and lon based on the location we just got
-// function getLocation(data) {
-//   console.log('getLocation() happened');
-//   lat = data.coords.latitude;
-//   lon = data.coords.longitude;
-
-//   //save the lat and lon to chrome for quicker loading in the future
-//   chrome.storage.sync.set({'lat': lat, 'lon': lon}, function(){
-//     console.log("location saved");
-//   });
-//   getTodayData(lat,lon);
-// }
-
+  //save the lat and lon to chrome for quicker loading in the future
+  chrome.storage.sync.set({'lat': lat, 'lon': lon}, function(){
+    console.log("location saved");
+  });
+  getTodayData(lat,lon);
+}
 
 //get today's data based on the lat and lon 
+//the promises AND getting geoLocation both trigger this
 function getTodayData(_lat, _lon){
   // console.log('getTodayData() happened - ' + lat + ", " + lon);
   var times = SunCalc.getTimes(new Date(), _lat, _lon);
@@ -281,8 +274,9 @@ setInterval(function() {
 
 
 
-
-/////////// INTERACTIVE STUFF FOR INDEX - background and info buttons
+////////////////////////////////////////
+/////////// BACKGROUND STUFF ///////////
+////////////////////////////////////////
 
 var bgIndex;
 
@@ -300,8 +294,8 @@ var promiseBg = new Promise(function(resolve, reject) {
   })
 });
 
-///ALWAYS FAILS WHEN IT'S GETTING INDEX 0
 
+///THIS ALWAYS FAILS WHEN IT'S GETTING INDEX 0
 promiseBg.then(function(result) {
   console.log(result);
   document.getElementById('container').style.backgroundImage = bgImgs[bgIndex];

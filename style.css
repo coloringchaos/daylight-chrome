@@ -46,9 +46,15 @@ p{
    margin:0;
 }
 table{
-   width:10em;
+   /*width:10em;*/
    font-size: 1em;
    line-height:1.6em;
+}
+.table-sm{
+   width:10em;
+}
+.table-bg{
+   width:22em;
 }
 #content{
    display:none;
@@ -68,7 +74,7 @@ table{
    font-weight:700;
 }
 .block{
-   padding:20px 60px;
+   padding:15px 60px;
 }
 .button{
    cursor:pointer;
