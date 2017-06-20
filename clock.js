@@ -238,7 +238,7 @@ document.getElementById('hideBtn').addEventListener("mousedown", function(){
 });
 
 //CHANGE BG IMAGE
-var bgImgs = ["url('img/ocean.jpg')", "url('img/gradient6.svg')", "url('img/gradient5.jpg')", "url('img/mountains.jpg')"];
+var bgImgs = ["url('img/gradient6.svg')", "url('img/ocean.jpg')", "url('img/gradient5.jpg')", "url('img/mountains.jpg')"];
 
 document.getElementById('bgBtn').addEventListener("mousedown", function(){
 

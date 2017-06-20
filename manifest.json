@@ -3,7 +3,7 @@
 
   "name": "Daylight Clock",
   "description": "This extensions is a location-based daylight clock that rotates 360 degrees over the course of daylight hours.",
-  "version": "1.4",
+  "version": "1.5",
 
   "chrome_url_overrides" : {
     "newtab": "daylight.html"

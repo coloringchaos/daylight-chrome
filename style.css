@@ -17,8 +17,8 @@ body {
    bottom:0;
    right:0;
    left:0;
-   /*background-image: url('img/gradient6.svg');*/
-   background-image: url('img/ocean.jpg');
+   background-image: url('img/gradient6.svg');
+   /*background-image: url('img/ocean.jpg');*/
    
    background-size: cover;
    opacity: .4; 
