@@ -1,5 +1,5 @@
 var sunrise, sunset, utcsunrise, utcsunset, dawn, dusk, utcdawn, utcdusk;
-var currentTime, daylength, currentdegree, daylightSec, dawnToDusk;
+var currentTime, daylength, currentdegree, daylightSec, dawnToDusk, elapsed;
 
 var lat, lon;
 
@@ -165,8 +165,8 @@ function getDaylength(){
   var ss = Math.floor(dawnToDusk % 3600 % 60);
   // console.log("hh: " + hh + ", mm: " + mm);
 
-  document.getElementById('dawnToDuskH').innerHTML = hh;
-  document.getElementById('dawnToDuskM').innerHTML = mm;
+  // document.getElementById('dawnToDuskH').innerHTML = hh;
+  // document.getElementById('dawnToDuskM').innerHTML = mm;
 
   //this will actuall rotate the hand!
   getDegree();
@@ -243,8 +243,23 @@ function getDegree(){
   // console.log("total daylight for current day: " + daylightSec + " seconds");
 
   //calculate the degree
-  var elapsed = parseInt(currentTime) - parseInt(sunrise);
+  elapsed = parseInt(currentTime) - parseInt(sunrise);
   currentdegree = (360*elapsed)/daylightSec; //in minutes, 1440 minutes in 24 hours
+  // console.log("elapsed seconds: " + elapsed);
+
+  ////////////get remaining time also - for info popup
+  var remainingSec = daylightSec - elapsed;
+  // console.log("remainingSec: " + remainingSec);
+
+  //convert remainingSec to something human readable (hrs, min, sec)
+  var remH = Math.floor(remainingSec / 3600);
+  var remM = Math.floor(remainingSec % 3600 / 60);
+  // console.log("h: " + h + ", m: " + m + ", s: " + s);
+
+  document.getElementById('remainingH').innerHTML = remH;
+  document.getElementById('remainingM').innerHTML = remM;
+
+
   
   //currentdegree is NaN until data has loaded, this deals with that
   if(isNaN(currentdegree)){
@@ -334,7 +349,11 @@ function changebackground(){
 }
 
 
-/////////////////DATE STUFF - for the clock on the '?' popup
+
+
+////////////////////////////////////////
+/////////////  DATE STUFF  /////////////
+////////////////////////////////////////
 
 var isTwelveHour = true;
 
@@ -399,5 +418,10 @@ startTime();
 
 //Run the script continually
 setInterval(startTime, 500);
+
+
+//figure out remaining daylight
+
+
 
 
