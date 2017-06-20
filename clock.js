@@ -53,7 +53,7 @@ promiseLon.then(function(result) {
 
 //if both promises are resolved, then getTodayData
 Promise.all([promiseLat, promiseLon]).then(function(){
-  console.log('resolved all! we have coordinates!');
+  // console.log('resolved all! we have coordinates!');
   getTodayData(lat, lon);
 });
 
@@ -88,14 +88,14 @@ Promise.all([promiseLat, promiseLon]).then(function(){
 
 //get today's data based on the lat and lon 
 function getTodayData(_lat, _lon){
-  console.log('getTodayData() happened - ' + lat + ", " + lon);
+  // console.log('getTodayData() happened - ' + lat + ", " + lon);
   var times = SunCalc.getTimes(new Date(), _lat, _lon);
   parseTimes(times);
 }
 
 //deal with formatting of the json data we got from SunCalc
 function parseTimes(json) {
-  console.log('parseTimes() happened');
+  // console.log('parseTimes() happened');
     //// DUSK / DAWN ////
     utcsunrise = json.sunrise.getTime()/1000;
     utcsunset = json.sunset.getTime()/1000;
@@ -103,11 +103,7 @@ function parseTimes(json) {
     utcdawn = json.dawn.getTime()/1000;
     utcdusk = json.dusk.getTime()/1000;
 
-    //// SUNRISE / SUNSET ////
-    // utcsunrise = json.sunrise.getTime()/1000;
-    // utcsunset = json.sunset.getTime()/1000;
-    console.log("utc sunrise " + utcsunrise + ", utc sunset " + utcsunset);
-
+    // console.log("utc sunrise " + utcsunrise + ", utc sunset " + utcsunset);
 
     //convert to UNIX - used for rotation calculation
     sunrise = convertUNIX(utcsunrise);
@@ -128,7 +124,7 @@ there are 86400 seconds in a day - so the sunrise should be
 sometime around 2000-3000 seconds, and sunset should be 5000++
 */
 var convertUNIX = function(UTC) {
-  console.log('convertUNIX() happened');
+  // console.log('convertUNIX() happened');
   var date = new Date(UTC*1000);         
   var hours = date.getHours() * 60; 
   var minutes = "0" + date.getMinutes();
@@ -140,7 +136,6 @@ var convertUNIX = function(UTC) {
 
 
 function getCurrentTime() {
-  // console.log('getCurrentTime() happened');
   /* this is getting the number of seconds that have elapsed 
   since the beginning of TODAY - it resets to zero at midnight */
   date = new Date();
@@ -154,10 +149,10 @@ function getCurrentTime() {
 }
 
 function getDaylength(){
-  console.log('getDaylength() happened');
+  // console.log('getDaylength() happened');
   //// SUNRISE TO SUNSET - this is sent to the DOM for info popup
   daylightSec = sunset - sunrise;
-  console.log("daylightSec: " + daylightSec);
+  console.log("total daylightSec for today: " + daylightSec);
 
   //convert daylightSec to something human readable (hrs, min, sec)
   var h = Math.floor(daylightSec / 3600);
@@ -175,17 +170,17 @@ function getDaylength(){
   var hh = Math.floor(dawnToDusk / 3600);
   var mm = Math.floor(dawnToDusk % 3600 / 60);
   var ss = Math.floor(dawnToDusk % 3600 % 60);
-  console.log("hh: " + hh + ", mm: " + mm);
+  // console.log("hh: " + hh + ", mm: " + mm);
 
   document.getElementById('dawnToDuskH').innerHTML = hh;
   document.getElementById('dawnToDuskM').innerHTML = mm;
 
-  //figure out 
-
+  //this will actuall rotate the hand!
+  getDegree();
 }
 
 function getRiseSetTimes(){
-  console.log('getRiseSetTimes() happened');
+  // console.log('getRiseSetTimes() happened');
   //GET SUNRISE TIME - then send this to the DOM
   //this is for the '?' popup
 
@@ -201,7 +196,6 @@ function getRiseSetTimes(){
     document.getElementById('riseMin').innerHTML = riseMin;
   }
   document.getElementById('riseHrs').innerHTML = riseHrs;
-  
 
   //////SUNSET
   var set = new Date(0);
@@ -247,11 +241,9 @@ function getRiseSetTimes(){
 }
 
 function getDegree(){
-  
-}
+  //get rid of "loading"
+  document.getElementById('loading').style.display = "none";
 
-
-setInterval(function() {
   currentTime = getCurrentTime();
   daylightSec = Math.floor(sunset - sunrise); //retuns the daylength in seconds 
   
@@ -271,15 +263,20 @@ setInterval(function() {
     currentdegree = 0;
   } 
 
-  console.log("current degrees: " + currentdegree);
+  // console.log("degrees: " + currentdegree);
 
   function rotate(el, degree) {
     el.setAttribute('transform', 'rotate('+ degree +' 50 50)')
   }
 
+  //rotate the hand
   rotate(hand, currentdegree);
+}
 
-}, 5000); //change back to 1000
+//check the degree every second
+setInterval(function() {
+  getDegree();
+}, 1000); //change back to 1000
 
 
 
@@ -287,7 +284,30 @@ setInterval(function() {
 
 /////////// INTERACTIVE STUFF FOR INDEX - background and info buttons
 
-var bgIndex = 0;
+var bgIndex;
+
+var promiseBg = new Promise(function(resolve, reject) {
+  //retrieve stored background index from chrome
+  chrome.storage.sync.get("bgIndex", function (data){
+    bgIndex = data.bgIndex;
+    //if we have a value, resolve. if not, reject
+    if (bgIndex) {
+      resolve("got bgIndex: " + bgIndex);
+    }
+    else {
+      reject(Error("can't get background"));
+    }
+  })
+});
+
+///ALWAYS FAILS WHEN IT'S GETTING INDEX 0
+
+promiseBg.then(function(result) {
+  console.log(result);
+  document.getElementById('container').style.backgroundImage = bgImgs[bgIndex];
+}, function(err) {
+  console.log(err);
+});
 
 //pop up the content box when name is clicked
 document.getElementById('info').addEventListener("mousedown", function(){
@@ -300,23 +320,24 @@ document.getElementById('hideBtn').addEventListener("mousedown", function(){
 });
 
 //CHANGE BG IMAGE
-var bgImgs = ["url('img/ocean.jpg')", "url('img/gradient6.svg')", "url('img/gradient5.jpg')", "url('img/mountains.jpg')"];
+var bgImgs = ["url('img/gradient5.jpg')", "url('img/gradient6.svg')", "url('img/ocean.jpg')", "url('img/mountains.jpg')"];
 
-document.getElementById('bgBtn').addEventListener("mousedown", function(){
+document.getElementById('bgBtn').addEventListener("mousedown", changebackground);
 
+function changebackground(){
   if(bgIndex < bgImgs.length-1) {
-    bgIndex++;
-    
+    bgIndex++; 
   }
   else {
      bgIndex = 0;   
   }
 
-  console.log("bgIndex: " + bgIndex);
+  chrome.storage.sync.set({'bgIndex': bgIndex}, function(){
+    console.log("bgIndex saved: " + bgIndex);
+  });
 
   document.getElementById('container').style.backgroundImage = bgImgs[bgIndex];
-  
-});
+}
 
 
 /////////////////DATE STUFF - for the clock on the '?' popup

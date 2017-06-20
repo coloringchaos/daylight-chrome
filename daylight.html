@@ -5,78 +5,107 @@
 
    <body>
 
-      <div id="clock-div">
+    <div id="container"></div> <!-- container is the background image -->
 
-      <div id="container"></div>
+    <h1 id="loading">loading...</h1>
 
-      <h1 id="loading">loading...</h1>
+    <div id="clock-div">
 
+      <!-- <div id="clock-face"> -->
       <svg id="clock" viewBox="0 0 100 100">
         <circle id="face" cx="50" cy="50" r="46"/>
           <g id="hands">
             <line id="hand" x1="50" y1="50" x2="50" y2="4"/>
           </g>
        </svg>
+     <!-- </div> -->
 
-    
-    </div>
+    </div> <!-- end clock div -->
 
     <div class="btnbox">
-      <span class="button white" id="info">Daylight Clock</span>
+      <span class="button white" id="info">daylight clock</span>
 
-      <span class="button blue" id="bgBtn">Background</span>
+      <!-- <span class="button blue" id="bgBtn">Background</span> -->
     </div>
+
+
+    <!-- ALL POP UP STUFF AFTER THIS -->
 
     <div id="content">
 
-      <p class="text">this is a daylight clock. it rotates 360 degrees over the course of daylight hours.</p>
+      <div id="allthestuff">
+        <div class="block top">
+          <p> 
+            <span id="weekday">Day</span> <span id="month">Month</span> <span id="day">00</span><br>
+            <span id="hour">00</span><span id="separator">:</span><span id="minute">00</span><span id="meridiem">pm</span>
+          </p>
+        </div>
 
-      <p class="text"> 
-        <span id="weekday">Day</span> <span id="month">Month</span> <span id="day">00</span>
+        <!-- sunrise / sunset block -->
+        <div class="block">
+          <table>
+            <tr>
+              <td><span class="bold">sunrise</span></td>
+              <td><span id="riseHrs">0</span>:<span id="riseMin">00</span>am</td>
+            </tr>
+            <tr>
+              <td><span class="bold">sunset</span></td>
+              <td><span id="setHrs">0</span>:<span id="setMin">00</span>pm</td>
+            </tr>
+          </table>
 
-        <br><br>
-
-        <span id="hour">00</span><span id="separator">:</span><span id="minute">00</span><span id="meridiem">pm</span>
-       
-      </p >
-
-      <p class="text">
-        <!-- sunrise is at <span id="riseHrs">0</span>:<span id="riseMin">00</span>am -->
-        sunrise is at <span id="riseHrs">0</span>:<span id="riseMin">00</span>am, 
-        sunset is at <span id="setHrs">0</span>:<span id="setMin">00</span>pm
-
-        <br><br>
-
-        sunrise to sunset is <span id="lengthH">0</span> hours, <span id="lengthM">00</span> minutes
-
-        <br><br><br><br>
-
-        first light is at <span id="dawnHrs">0</span>:<span id="dawnMin">00</span>am, last light is at <span id="duskHrs">0</span>:<span id="duskMin">00</span>pm
-
-        <br><br>
-
-        first light to last light is <span id="dawnToDuskH">0</span> hours, <span id="dawnToDuskM">00</span> minutes
+          <p class="daylength">
+            <span id="lengthH">0</span> hours, <span id="lengthM">00</span> minutes
+          </p>
+        </div>
 
 
-        <!-- sunset ends at <span id="setHrs">0</span>:<span id="setMin">00</span>pm -->
-        
+        <!-- first / last light block -->
+        <div class="block">
+          <table>
+            <tr>
+              <td><span class="bold">first light</span></td>
+              <td><span id="dawnHrs">0</span>:<span id="dawnMin">00</span>am</td>
+            </tr>
+            <tr>
+              <td><span class="bold">last light</span></td>
+              <td><span id="duskHrs">0</span>:<span id="duskMin">00</span>pm</td>
+            </tr>
+          </table>
+          <p>
+            <span id="dawnToDuskH">0</span> hours, <span id="dawnToDuskM">00</span> minutes
+          </p>
+        </div>
 
-        
 
-      </p>
+        <!-- info block -->
+        <div class="block">
+          <p class="bold">This daylight clock provides a dynamic expression of time based on the period of daylight for your current location. </p>
+          <br>
+          <p class="info"><span class="bold">How it works:</span> The hand rotates 360 degrees over the course of daylight hours. Because the sun rises and sets at a different time every single day of the year, the hand of this clock moves at a different speed everyday - it rotates faster in the winter and slower in the summer. The hand does not move when the sun is down. </p>
+        </div>
 
 
-      <p class="text">have a bright day &#9728;</p>
+        <div id="hideBtn">
+          <!-- <span class="button blue" id="hideBtn">Hide This</span> -->
+          <div class="lr">
+            <div class="rl">
+            </div>
+          </div>
+        </div>
+
+        <div class="block"><span class="button blue" id="bgBtn">change background</span></div>
       
-      <div class="text"><span class="button blue" id="hideBtn">Hide This</span></div>
 
-    </div>
+      </div><!-- end allthestuff div -->
+
+    </div> <!-- end content block -->
      
    <script type="text/javascript" src="suncalc.js"></script>
    <script type="text/javascript" src="jquery-1.11.3.min.js"></script>
    <script type="text/javascript" src="clock.js"></script>
 
-   <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet">
+   <link href="https://fonts.googleapis.com/css?family=Inconsolata:400,700" rel="stylesheet">
    <link href="style.css" rel="stylesheet">
 
    </body>
