@@ -61,7 +61,7 @@ Promise.all([promiseLat, promiseLon]).then(function(){
 //get the user's location, do this everytime even if we have something saved
 navigator.geolocation.getCurrentPosition(function(position) {
   setLocation(position);
-  // console.log("got location");
+  console.log("got location");
 }, function(positionError) {
   console.error(positionError);
 });
@@ -329,11 +329,7 @@ document.getElementById('hideBtn').addEventListener("mousedown", function(){
 });
 
 //CHANGE BG IMAGE
-<<<<<<< HEAD
-var bgImgs = ["url('img/gradient6.svg')", "url('img/ocean.jpg')", "url('img/gradient5.jpg')", "url('img/mountains.jpg')"];
-=======
 var bgImgs = ["url('img/gradient5.jpg')", "url('img/gradient6.svg')", "url('img/ocean.jpg')", "url('img/mountains.jpg')"];
->>>>>>> 5a908f719fa505745834f3bcc253a380cb810eca
 
 document.getElementById('bgBtn').addEventListener("mousedown", changebackground);
 
