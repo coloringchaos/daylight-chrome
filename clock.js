@@ -1,65 +1,106 @@
 var sunrise, sunset, utcsunrise, utcsunset, dawn, dusk, utcdawn, utcdusk;
-var currentTime, daylength, currentdegree, daylightSec, dawnToDusk;
-var loaded = false;
+var currentTime, daylength, currentdegree, daylightSec, dawnToDusk, elapsed;
 
-//dont show the clock face at first
-// document.getElementById("hands").style.display = "none";
+var lat, lon;
+
+//get lat saved to chrome
+var promiseLat = new Promise(function(resolve, reject) {
+  //retrieve stored lat from chrome
+  chrome.storage.sync.get("lat", function (data){
+
+    //set saved lat to our variable
+    lat = data.lat;
+    lon = data.lon;
+
+    //if we have a value, resolve. if not, reject
+    if (lat) {
+      resolve("got latitude saved in chrome mem: " + lat);
+    }
+    else {
+      reject(Error("can't get lat"));
+    }
+  })
+});
+
+promiseLat.then(function(result) {
+  console.log(result);
+}, function(err) {
+  console.log(err);
+});
+
+var promiseLon = new Promise(function(resolve, reject) {
+  //retrieve stored lat from chrome
+  chrome.storage.sync.get("lon", function (data){
+
+    //set saved lat to our variable
+    lon = data.lon;
+
+    //if we have a value, resolve. if not, reject
+    if (lon) {
+      resolve("got longitude saved in chrome mem: " + lon);
+    }
+    else {
+      reject(Error("can't get lon"));
+    }
+  })
+});
+
+promiseLon.then(function(result) {
+  console.log(result);
+}, function(err) {
+  console.log(err);
+});
+
+//if both promises are resolved, then getTodayData
+Promise.all([promiseLat, promiseLon]).then(function(){
+  // console.log('resolved all! we have coordinates!');
+  getTodayData(lat, lon);
+});
 
 
-// get user location from the browser
+//get the user's location, do this everytime even if we have something saved
 navigator.geolocation.getCurrentPosition(function(position) {
-  getLocation(position)
+  setLocation(position);
+  // console.log("got location");
 }, function(positionError) {
   console.error(positionError);
 });
 
-//set lat and lon
-function getLocation(data) {
-  var lat = data.coords.latitude;
-  var lon = data.coords.longitude;
-  console.log("lat = " + lat + ", lon = " + lon);
+// set lat and lon based on the location we just got
+function setLocation(data) {
+  lat = data.coords.latitude;
+  lon = data.coords.longitude;
 
-  getTodayData(lat, lon);
-  loaded = true;
-  // console.log("LOADED");
-  showClock();
+  //save the lat and lon to chrome for quicker loading in the future
+  chrome.storage.sync.set({'lat': lat, 'lon': lon}, function(){
+    console.log("location saved");
+  });
+  getTodayData(lat,lon);
 }
 
-//do this on load - once we have lat lon data, show clock and hide 'loading'
-function showClock(){
-  console.log("showing clock");
-  document.getElementById('hands').style.display = "block";
-  document.getElementById('loading').style.display = "none";
-}
-
-//get today's data
+//get today's data based on the lat and lon 
+//the promises AND getting geoLocation both trigger this
 function getTodayData(_lat, _lon){
+  // console.log('getTodayData() happened - ' + lat + ", " + lon);
   var times = SunCalc.getTimes(new Date(), _lat, _lon);
-
-    // console.log(times);
-    parseTimes(times);
+  parseTimes(times);
 }
 
 //deal with formatting of the json data we got from SunCalc
 function parseTimes(json) {
-    //////////// DUSK / DAWN
+  // console.log('parseTimes() happened');
+    //// DUSK / DAWN ////
     utcsunrise = json.sunrise.getTime()/1000;
     utcsunset = json.sunset.getTime()/1000;
 
     utcdawn = json.dawn.getTime()/1000;
-    // console.log("utcdawn: " + utcdawn);
     utcdusk = json.dusk.getTime()/1000;
 
-    //////////// SUNRISE / SUNSET
-    // utcsunrise = json.sunrise.getTime()/1000;
-    // utcsunset = json.sunset.getTime()/1000;
     // console.log("utc sunrise " + utcsunrise + ", utc sunset " + utcsunset);
-
 
     //convert to UNIX - used for rotation calculation
     sunrise = convertUNIX(utcsunrise);
     sunset = convertUNIX(utcsunset);
-    // console.log("sunrise is at " + sunrise + " seconds, sunset is at " + sunset + " seconds");
 
     dawn = convertUNIX(utcdawn);
     dusk = convertUNIX(utcdusk);
@@ -76,19 +117,20 @@ there are 86400 seconds in a day - so the sunrise should be
 sometime around 2000-3000 seconds, and sunset should be 5000++
 */
 var convertUNIX = function(UTC) {
+  // console.log('convertUNIX() happened');
   var date = new Date(UTC*1000);         
   var hours = date.getHours() * 60; 
   var minutes = "0" + date.getMinutes();
   var totalMinutes = parseInt(hours) + parseInt(minutes);
   var totalSeconds = parseInt(totalMinutes) * 60;
 
-  // console.log('date' + date);
   return totalSeconds;
 }
 
 
 function getCurrentTime() {
-  //this is getting the number of seconds that have elapsed since the beginning of TODAY - it resets to zero at midnight
+  /* this is getting the number of seconds that have elapsed 
+  since the beginning of TODAY - it resets to zero at midnight */
   date = new Date();
   hours = date.getHours() * 60; 
   minutes = "0" + date.getMinutes();
@@ -100,9 +142,10 @@ function getCurrentTime() {
 }
 
 function getDaylength(){
-  /////SUNRISE TO SUNSET - this is sent to the DOM for info popup
+  // console.log('getDaylength() happened');
+  //// SUNRISE TO SUNSET - this is sent to the DOM for info popup
   daylightSec = sunset - sunrise;
-  console.log("daylightSec: " + daylightSec);
+  console.log("total daylightSec for today: " + daylightSec);
 
   //convert daylightSec to something human readable (hrs, min, sec)
   var h = Math.floor(daylightSec / 3600);
@@ -120,14 +163,17 @@ function getDaylength(){
   var hh = Math.floor(dawnToDusk / 3600);
   var mm = Math.floor(dawnToDusk % 3600 / 60);
   var ss = Math.floor(dawnToDusk % 3600 % 60);
-  console.log("hh: " + hh + ", mm: " + mm);
+  // console.log("hh: " + hh + ", mm: " + mm);
 
-  document.getElementById('dawnToDuskH').innerHTML = hh;
-  document.getElementById('dawnToDuskM').innerHTML = mm;
+  // document.getElementById('dawnToDuskH').innerHTML = hh;
+  // document.getElementById('dawnToDuskM').innerHTML = mm;
 
+  //this will actuall rotate the hand!
+  getDegree();
 }
 
 function getRiseSetTimes(){
+  // console.log('getRiseSetTimes() happened');
   //GET SUNRISE TIME - then send this to the DOM
   //this is for the '?' popup
 
@@ -143,7 +189,6 @@ function getRiseSetTimes(){
     document.getElementById('riseMin').innerHTML = riseMin;
   }
   document.getElementById('riseHrs').innerHTML = riseHrs;
-  
 
   //////SUNSET
   var set = new Date(0);
@@ -188,16 +233,33 @@ function getRiseSetTimes(){
     
 }
 
+function getDegree(){
+  //get rid of "loading"
+  document.getElementById('loading').style.display = "none";
 
-setInterval(function() {
   currentTime = getCurrentTime();
   daylightSec = Math.floor(sunset - sunrise); //retuns the daylength in seconds 
   
   // console.log("total daylight for current day: " + daylightSec + " seconds");
 
   //calculate the degree
-  var elapsed = parseInt(currentTime) - parseInt(sunrise);
+  elapsed = parseInt(currentTime) - parseInt(sunrise);
   currentdegree = (360*elapsed)/daylightSec; //in minutes, 1440 minutes in 24 hours
+  // console.log("elapsed seconds: " + elapsed);
+
+  ////////////get remaining time also - for info popup
+  var remainingSec = daylightSec - elapsed;
+  // console.log("remainingSec: " + remainingSec);
+
+  //convert remainingSec to something human readable (hrs, min, sec)
+  var remH = Math.floor(remainingSec / 3600);
+  var remM = Math.floor(remainingSec % 3600 / 60);
+  // console.log("h: " + h + ", m: " + m + ", s: " + s);
+
+  document.getElementById('remainingH').innerHTML = remH;
+  document.getElementById('remainingM').innerHTML = remM;
+
+
   
   //currentdegree is NaN until data has loaded, this deals with that
   if(isNaN(currentdegree)){
@@ -209,23 +271,52 @@ setInterval(function() {
     currentdegree = 0;
   } 
 
-  console.log("current degrees: " + currentdegree);
+  // console.log("degrees: " + currentdegree);
 
   function rotate(el, degree) {
     el.setAttribute('transform', 'rotate('+ degree +' 50 50)')
   }
 
+  //rotate the hand
   rotate(hand, currentdegree);
+}
 
-}, 1000);
+//check the degree every second
+setInterval(function() {
+  getDegree();
+}, 1000); //change back to 1000
 
 
 
 
+////////////////////////////////////////
+/////////// BACKGROUND STUFF ///////////
+////////////////////////////////////////
 
-/////////// INTERACTIVE STUFF FOR INDEX - background and info buttons
+var bgIndex;
 
-var bgIndex = 0;
+var promiseBg = new Promise(function(resolve, reject) {
+  //retrieve stored background index from chrome
+  chrome.storage.sync.get("bgIndex", function (data){
+    bgIndex = data.bgIndex;
+    //if we have a value, resolve. if not, reject
+    if (bgIndex) {
+      resolve("got bgIndex: " + bgIndex);
+    }
+    else {
+      reject(Error("can't get background"));
+    }
+  })
+});
+
+
+///THIS ALWAYS FAILS WHEN IT'S GETTING INDEX 0
+promiseBg.then(function(result) {
+  console.log(result);
+  document.getElementById('container').style.backgroundImage = bgImgs[bgIndex];
+}, function(err) {
+  console.log(err);
+});
 
 //pop up the content box when name is clicked
 document.getElementById('info').addEventListener("mousedown", function(){
@@ -238,26 +329,35 @@ document.getElementById('hideBtn').addEventListener("mousedown", function(){
 });
 
 //CHANGE BG IMAGE
+<<<<<<< HEAD
 var bgImgs = ["url('img/gradient6.svg')", "url('img/ocean.jpg')", "url('img/gradient5.jpg')", "url('img/mountains.jpg')"];
+=======
+var bgImgs = ["url('img/gradient5.jpg')", "url('img/gradient6.svg')", "url('img/ocean.jpg')", "url('img/mountains.jpg')"];
+>>>>>>> 5a908f719fa505745834f3bcc253a380cb810eca
 
-document.getElementById('bgBtn').addEventListener("mousedown", function(){
+document.getElementById('bgBtn').addEventListener("mousedown", changebackground);
 
+function changebackground(){
   if(bgIndex < bgImgs.length-1) {
-    bgIndex++;
-    
+    bgIndex++; 
   }
   else {
      bgIndex = 0;   
   }
 
-  console.log("bgIndex: " + bgIndex);
+  chrome.storage.sync.set({'bgIndex': bgIndex}, function(){
+    console.log("bgIndex saved: " + bgIndex);
+  });
 
   document.getElementById('container').style.backgroundImage = bgImgs[bgIndex];
-  
-});
+}
 
 
-/////////////////DATE STUFF - for the clock on the '?' popup
+
+
+////////////////////////////////////////
+/////////////  DATE STUFF  /////////////
+////////////////////////////////////////
 
 var isTwelveHour = true;
 
@@ -322,5 +422,10 @@ startTime();
 
 //Run the script continually
 setInterval(startTime, 500);
+
+
+//figure out remaining daylight
+
+
 
 

@@ -19,8 +19,6 @@
   "browser_action": {
     "default_icon": "icon16.png",
 
-
-
     "default_icon": "icon.png",
     "default_popup": "popup.html"
   },
@@ -35,6 +33,7 @@
     "activeTab",
     "https://ajax.googleapis.com/",
     "geolocation",
-    "contextMenus"
+    "contextMenus",
+    "storage"
   ]
 }
