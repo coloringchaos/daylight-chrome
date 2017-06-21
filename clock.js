@@ -1,5 +1,6 @@
 var sunrise, sunset, utcsunrise, utcsunset, dawn, dusk, utcdawn, utcdusk;
 var currentTime, daylength, currentdegree, daylightSec, dawnToDusk, elapsed;
+var isdark = true;
 
 var lat, lon;
 
@@ -17,13 +18,13 @@ var promiseLat = new Promise(function(resolve, reject) {
       resolve("got latitude saved in chrome mem: " + lat);
     }
     else {
-      reject(Error("can't get lat"));
+      reject(Error("can't get latitude"));
     }
   })
 });
 
 promiseLat.then(function(result) {
-  console.log(result);
+  // console.log(result);
 }, function(err) {
   console.log(err);
 });
@@ -40,13 +41,13 @@ var promiseLon = new Promise(function(resolve, reject) {
       resolve("got longitude saved in chrome mem: " + lon);
     }
     else {
-      reject(Error("can't get lon"));
+      reject(Error("can't get longitude"));
     }
   })
 });
 
 promiseLon.then(function(result) {
-  console.log(result);
+  // console.log(result);
 }, function(err) {
   console.log(err);
 });
@@ -61,7 +62,7 @@ Promise.all([promiseLat, promiseLon]).then(function(){
 //get the user's location, do this everytime even if we have something saved
 navigator.geolocation.getCurrentPosition(function(position) {
   setLocation(position);
-  console.log("got location");
+  // console.log("got location");
 }, function(positionError) {
   console.error(positionError);
 });
@@ -73,7 +74,7 @@ function setLocation(data) {
 
   //save the lat and lon to chrome for quicker loading in the future
   chrome.storage.sync.set({'lat': lat, 'lon': lon}, function(){
-    console.log("location saved");
+    // console.log("location saved");
   });
   getTodayData(lat,lon);
 }
@@ -145,7 +146,7 @@ function getDaylength(){
   // console.log('getDaylength() happened');
   //// SUNRISE TO SUNSET - this is sent to the DOM for info popup
   daylightSec = sunset - sunrise;
-  console.log("total daylightSec for today: " + daylightSec);
+  // console.log("total daylightSec for today: " + daylightSec);
 
   //convert daylightSec to something human readable (hrs, min, sec)
   var h = Math.floor(daylightSec / 3600);
@@ -256,11 +257,19 @@ function getDegree(){
   var remM = Math.floor(remainingSec % 3600 / 60);
   // console.log("h: " + h + ", m: " + m + ", s: " + s);
 
-  document.getElementById('remainingH').innerHTML = remH;
-  document.getElementById('remainingM').innerHTML = remM;
 
+  //for daylight remaining info section - only display this during the daytime
+  if(currentdegree > 0 && currentdegree < 360){
+    isdark = false;
+    document.getElementById('remains').style.display = "table-row";
+    document.getElementById('remainingH').innerHTML = remH;
+    document.getElementById('remainingM').innerHTML = remM;
+  }else{
+    isdark = true;
+    document.getElementById('remains').style.display = "none";
+  }
+  // console.log(isdark);
 
-  
   //currentdegree is NaN until data has loaded, this deals with that
   if(isNaN(currentdegree)){
     currentdegree = 0;
@@ -270,8 +279,6 @@ function getDegree(){
   if (currentdegree > 360 || currentdegree < 0) {
     currentdegree = 0;
   } 
-
-  // console.log("degrees: " + currentdegree);
 
   function rotate(el, degree) {
     el.setAttribute('transform', 'rotate('+ degree +' 50 50)')
@@ -299,6 +306,7 @@ var promiseBg = new Promise(function(resolve, reject) {
   //retrieve stored background index from chrome
   chrome.storage.sync.get("bgIndex", function (data){
     bgIndex = data.bgIndex;
+    // console.log("get: bgIndex is " + bgIndex);
     //if we have a value, resolve. if not, reject
     if (bgIndex) {
       resolve("got bgIndex: " + bgIndex);
@@ -312,7 +320,7 @@ var promiseBg = new Promise(function(resolve, reject) {
 
 ///THIS ALWAYS FAILS WHEN IT'S GETTING INDEX 0
 promiseBg.then(function(result) {
-  console.log(result);
+  // console.log(result);
   document.getElementById('container').style.backgroundImage = bgImgs[bgIndex];
 }, function(err) {
   console.log(err);
